@@ -28,13 +28,22 @@ class ViewBoostMod(loader.Module):
             
             # Получаем ссылку и количество просмотров
             link = parts[1]
+            views_str = parts[2]
+            
+            # Очищаем строку с числом от всех нечисловых символов
+            views_str = ''.join(filter(str.isdigit, views_str))
+            
+            if not views_str:
+                await message.edit("❌ Количество просмотров должно содержать цифры\nПример: .nakryt https://t.me/channel/123 1000")
+                return
+                
             try:
-                self.views_to_add = int(parts[2].replace(',', '').replace(' ', ''))
+                self.views_to_add = int(views_str)
                 if self.views_to_add <= 0:
                     await message.edit("❌ Количество просмотров должно быть положительным числом")
                     return
             except ValueError:
-                await message.edit("❌ Количество просмотров должно быть числом\nПример: .nakryt https://t.me/channel/123 1000")
+                await message.edit(f"❌ Не удалось преобразовать '{parts[2]}' в число\nПример: .nakryt https://t.me/channel/123 1000")
                 return
             
             # Извлекаем channel_id и message_id из ссылки
