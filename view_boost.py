@@ -19,15 +19,23 @@ class ViewBoostMod(loader.Module):
         """Использование: .nakryt <ссылка> <количество просмотров>
         Начинает накрутку просмотров на указанный пост"""
         
-        args = message.text.split(maxsplit=2)
-        if len(args) < 3:
-            await message.edit("❌ Использование: .nakryt <ссылка> <количество просмотров>")
-            return
-            
         try:
-            # Парсим ссылку и количество просмотров
-            link = args[1]
-            self.views_to_add = int(args[2])
+            # Разбираем команду на части
+            parts = message.text.split()
+            if len(parts) < 3:
+                await message.edit("❌ Использование: .nakryt <ссылка> <количество просмотров>\nПример: .nakryt https://t.me/channel/123 1000")
+                return
+            
+            # Получаем ссылку и количество просмотров
+            link = parts[1]
+            try:
+                self.views_to_add = int(parts[2].replace(',', '').replace(' ', ''))
+                if self.views_to_add <= 0:
+                    await message.edit("❌ Количество просмотров должно быть положительным числом")
+                    return
+            except ValueError:
+                await message.edit("❌ Количество просмотров должно быть числом\nПример: .nakryt https://t.me/channel/123 1000")
+                return
             
             # Извлекаем channel_id и message_id из ссылки
             match = re.search(r't\.me/([^/]+)/(\d+)', link)
@@ -68,10 +76,8 @@ class ViewBoostMod(loader.Module):
             if self.current_views >= self.views_to_add:
                 await message.edit(f"✅ Накрутка завершена! Всего накручено: {self.current_views} просмотров")
             
-        except ValueError:
-            await message.edit("❌ Укажите корректное количество просмотров (число)")
         except Exception as e:
-            await message.edit(f"❌ Произошла ошибка: {str(e)}")
+            await message.edit(f"❌ Произошла ошибка: {str(e)}\nИспользование: .nakryt <ссылка> <количество просмотров>\nПример: .nakryt https://t.me/channel/123 1000")
     
     @loader.command()
     async def stopnakryt(self, message):
